@@ -1,4 +1,4 @@
-import { useState, } from 'react';
+import { useState, useEffect } from 'react';
 import type { Question } from '../models/Question.js';
 import { getQuestions } from '../services/questionApi.js';
 
@@ -8,6 +8,7 @@ const Quiz = () => {
   const [score, setScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30); // 30 seconds per question
 
   const getRandomQuestions = async () => {
     try {
@@ -31,6 +32,7 @@ const Quiz = () => {
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < questions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
+      setTimeLeft(30); // Reset timer for the next question
     } else {
       setQuizCompleted(true);
     }
@@ -42,7 +44,29 @@ const Quiz = () => {
     setQuizCompleted(false);
     setScore(0);
     setCurrentQuestionIndex(0);
+    setTimeLeft(30); // Reset timer when starting the quiz
   };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
+    // Clear timer on component unmount or when the question changes
+    return () => clearInterval(timer);
+  }, [currentQuestionIndex]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      const nextQuestionIndex = currentQuestionIndex + 1;
+      if (nextQuestionIndex < questions.length) {
+        setCurrentQuestionIndex(nextQuestionIndex);
+        setTimeLeft(30); // Reset timer for the next question
+      } else {
+        setQuizCompleted(true);
+      }
+    }
+  }, [timeLeft, currentQuestionIndex, questions.length]);
 
   if (!quizStarted) {
     return (
@@ -83,13 +107,16 @@ const Quiz = () => {
   return (
     <div className='card p-4'>
       <h2>{currentQuestion.question}</h2>
+      <div className="alert alert-info">Time Left: {timeLeft} seconds</div>
       <div className="mt-3">
-      {currentQuestion.answers.map((answer, index) => (
-        <div key={index} className="d-flex align-items-center mb-2">
-          <button className="btn btn-primary" onClick={() => handleAnswerClick(answer.isCorrect)}>{index + 1}</button>
-          <div className="alert alert-secondary mb-0 ms-2 flex-grow-1">{answer.text}</div>
-        </div>
-      ))}
+        {currentQuestion.answers.map((answer, index) => (
+          <div key={index} className="d-flex align-items-center mb-2">
+            <button className="btn btn-primary" onClick={() => handleAnswerClick(answer.isCorrect)}>
+              {index + 1}
+            </button>
+            <div className="alert alert-secondary mb-0 ms-2 flex-grow-1">{answer.text}</div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ cypress
 For testing feature viability
 
 ## Testing
-To running in a terminal, run the following commands:
+To run in a terminal, run the following commands:
 npm install
 npm run build
 npm run seed
@@ -37,7 +37,7 @@ npm run start
 jgonnellaTEST@gmail.com
 
 ## Render Website
-
+https://githubactions-wirx.onrender.com/
 
 ## License
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
